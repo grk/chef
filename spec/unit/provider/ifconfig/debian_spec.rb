@@ -37,7 +37,7 @@ describe Chef::Provider::Ifconfig::Debian do
     new_resource
   end
 
-  let(:current_resource) {  Chef::Resource::Ifconfig.new("10.0.0.1", run_context) }
+  let(:current_resource) { Chef::Resource::Ifconfig.new("10.0.0.1", run_context) }
 
   let(:provider) do
     status = double("Status", :exitstatus => 0)
@@ -67,7 +67,15 @@ describe Chef::Provider::Ifconfig::Debian do
       before do
         stub_const("Chef::Provider::Ifconfig::Debian::INTERFACES_FILE", tempfile.path)
         stub_const("Chef::Provider::Ifconfig::Debian::INTERFACES_DOT_D_DIR", tempdir_path)
-        expect(File).to receive(:new).with(config_filename_ifcfg, "w").and_return(config_file_ifcfg)
+
+        expect(provider).to receive(:resource_for_config).with(config_filename_ifcfg).and_return(config_file_ifcfg)
+        expect(config_file_ifcfg).to receive(:content) do |contents|
+          config_file_ifcfg.puts(contents)
+        end
+        expect(config_file_ifcfg).to receive(:run_action).with(:create) do
+          config_file_ifcfg.flush
+        end
+        expect(config_file_ifcfg).to receive(:updated?).and_return(true)
       end
 
       it "should write a network-script" do
@@ -123,7 +131,6 @@ iface eth0 inet static
   netmask 255.255.254.0
 EOF
         )
-        expect(File).to receive(:new).with(config_filename_ifcfg, "w").and_return(config_file_ifcfg)
         expect(File.exists?(tempdir_path)).to be_true  # since the file exists, the enclosing dir must also exist
       end
 
@@ -139,6 +146,7 @@ EOF
         before do
           tempfile.write(expected_string)
           tempfile.close
+          expect(provider).not_to receive(:converge_by).with("modifying #{tempfile.path} to source #{tempdir_path}")
         end
 
         it "should preserve all the contents" do
@@ -318,8 +326,7 @@ source #{tempdir_path}/*
 
     it "should delete network-script if it exists" do
       current_resource.device new_resource.device
-      expect(File).to receive(:exist?).with(config_filename_ifcfg).and_return(true)
-      expect(FileUtils).to receive(:rm_f).with(config_filename_ifcfg, :verbose => false)
+      expect(provider).to receive(:converge_by).with("run ifconfig #{new_resource.device} down to delete #{new_resource}")
 
       provider.run_action(:delete)
     end
