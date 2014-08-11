@@ -31,7 +31,7 @@ class Chef
         attr_reader :new_resource
         attr_reader :current_resource
 
-        def initialize(uri, new_resource, current_resource)
+        def initialize(uri, new_resource, current_resource, run_context)
           @uri = uri
           @new_resource = new_resource
           @current_resource = current_resource

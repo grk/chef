@@ -22,14 +22,14 @@ class Chef
     class RemoteFile
       class Fetcher
 
-        def self.for_resource(uri, new_resource, current_resource)
+        def self.for_resource(uri, new_resource, current_resource, run_context)
           case uri.scheme
           when "http", "https"
-            Chef::Provider::RemoteFile::HTTP.new(uri, new_resource, current_resource)
+            Chef::Provider::RemoteFile::HTTP.new(uri, new_resource, current_resource, run_context)
           when "ftp"
-            Chef::Provider::RemoteFile::FTP.new(uri, new_resource, current_resource)
+            Chef::Provider::RemoteFile::FTP.new(uri, new_resource, current_resource, run_context)
           when "file"
-            Chef::Provider::RemoteFile::LocalFile.new(uri, new_resource, current_resource)
+            Chef::Provider::RemoteFile::LocalFile.new(uri, new_resource, current_resource, run_context)
           else
             raise ArgumentError, "Invalid uri, Only http(s), ftp, and file are currently supported"
           end

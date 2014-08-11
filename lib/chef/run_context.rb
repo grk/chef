@@ -25,6 +25,7 @@ require 'chef/log'
 require 'chef/recipe'
 require 'chef/run_context/cookbook_compiler'
 require 'chef/event_dispatch/events_output_stream'
+require 'net/http/persistent'
 
 class Chef
 
@@ -60,6 +61,9 @@ class Chef
 
     # Event dispatcher for this run.
     attr_reader :events
+
+    # net-http-persistent client cache for use across Chef::REST/Chef:HTTP objects
+    attr_reader :http_client_cache
 
     # Creates a new Chef::RunContext object and populates its fields. This object gets
     # used by the Chef Server to generate a fully compiled recipe list for a node.
@@ -154,7 +158,6 @@ first add a dependency on cookbook '#{cookbook_name}' in the cookbook you're
 including it from in that cookbook's metadata.
 ERROR_MESSAGE
       end
-
 
       if loaded_fully_qualified_recipe?(cookbook_name, recipe_short_name)
         Chef::Log.debug("I am not loading #{recipe_name}, because I have already seen it.")
@@ -269,6 +272,10 @@ ERROR_MESSAGE
       else
         stream
       end
+    end
+
+    def http_client_cache
+      @http_client_cache ||= Net::HTTP::Persistent.new
     end
 
     private

@@ -31,12 +31,14 @@ class Chef
         attr_reader :uri
         attr_reader :new_resource
         attr_reader :current_resource
+        attr_reader :run_context
 
         # Parse the uri into instance variables
-        def initialize(uri, new_resource, current_resource)
+        def initialize(uri, new_resource, current_resource, run_context)
           @uri = uri
           @new_resource = new_resource
           @current_resource = current_resource
+          @run_context = run_context
         end
 
         def headers
@@ -108,6 +110,7 @@ class Chef
             Chef::Log.debug("turning gzip compression off due to filename ending in gz")
             opts[:disable_gzip] = true
           end
+          opts[:http_client_cache] = run_context.http_client_cache
           opts
         end
 

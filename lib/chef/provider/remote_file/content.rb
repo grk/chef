@@ -61,7 +61,7 @@ class Chef
 
         # Given a source uri, return a Tempfile, or a File that acts like a Tempfile (close! method)
         def grab_file_from_uri(uri)
-          Chef::Provider::RemoteFile::Fetcher.for_resource(uri, @new_resource, @current_resource).fetch
+          Chef::Provider::RemoteFile::Fetcher.for_resource(uri, @new_resource, @current_resource, @run_context).fetch
         end
 
         def current_resource_matches_target_checksum?

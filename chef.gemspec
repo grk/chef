@@ -33,6 +33,8 @@ Gem::Specification.new do |s|
 
   s.add_dependency "pry", "~> 0.9"
 
+  s.add_dependency "net-http-persistent", "~> 2.0"
+
   s.add_development_dependency "rack"
 
   # Rake 10.2 drops Ruby 1.8 support
